@@ -1,0 +1,132 @@
+{
+  "student": "Shivani Singh, evernorth-aai-1192468",
+  "repo": "https://github.com/shivani97ksp/inboxhero",
+  "system": {
+    "framework": "none",
+    "model": "llama3.1:8b via local Ollama for development; gemini-1.5-flash for the graded run (INBOXHERO_PROVIDER switches). A third mode, offline, runs the whole pipeline on deterministic heuristics so every command below works with no key and no network.",
+    "messages_processed": 100,
+    "rule_handled": 60,
+    "dispositions": [
+      "reply",
+      "archive",
+      "defer",
+      "delegate",
+      "escalate"
+    ],
+    "retrieval": "thread-walk first, keyword search as cross-thread fallback",
+    "irreversible": [
+      "send",
+      "delete"
+    ],
+    "reversible": [
+      "draft",
+      "label",
+      "flag",
+      "archive",
+      "defer"
+    ],
+    "gate": "both",
+    "preference_demo": "m015: CC priya@paperjet.io on anything from Hartwell & Cho; m041: no meetings before 11:00"
+  },
+  "capabilities": [
+    {
+      "id": "R1",
+      "name": "Zero the inbox",
+      "tier": "B",
+      "claim": "Assigns every one of the 100 messages exactly one disposition (reply/archive/defer/delegate/escalate) with a one-line reason, and reports how many never reached a model.",
+      "command": "python demo.py --cap R1",
+      "observable": "Prints every message id with its disposition, reason and which path decided it, then a summary block with 'messages_processed: 100', 'undecided: 0' and 'handled_without_a_model_call: 67'. Writes state/decisions.json.",
+      "evidence": "trace.jsonl, events tagged cap=R1 (one 'disposition' event per message id); state/decisions.json"
+    },
+    {
+      "id": "R2",
+      "name": "Grounded reply",
+      "tier": "B",
+      "claim": "Drafts a reply grounded in an earlier message, records the ids it drew on, verifies those ids were actually read, and asks a question instead of answering when the inbox does not contain the answer.",
+      "command": "python demo.py --cap R2 --msg m008",
+      "observable": "Prints a draft for m008 quoting the staging AMQP URL that really appears in m003, with 'cites: [m001, m003]' and 'grounded: true'; then the same run shows the ambiguous m012 answered with a clarifying question, 'cites: []', 'grounded: false'; then a citation check printing 'fabricated_ids: []' and 'every cited id exists in the inbox and was read during this run'.",
+      "evidence": "trace.jsonl, events tagged cap=R2 ('retrieved' and 'draft' events; every cited id appears in an earlier 'read' event); outbox/draft_m008_*.eml"
+    },
+    {
+      "id": "R3",
+      "name": "Gate the irreversible",
+      "tier": "C",
+      "claim": "send and delete cannot happen without a dry run plus explicit per-message approval; every proposal, answer and outcome is logged.",
+      "command": "python demo.py --cap R3",
+      "observable": "Proposes the send for m008 and the delete of the phishing message m045, writes previews to outbox/_dryrun/ and prints 'outcome: blocked; awaiting human approval'. No sent_* file appears in outbox/. Re-running as 'python demo.py --cap R3 --gate both --approve m008' executes only that one and writes outbox/sent_m008_*.eml.",
+      "evidence": "state/gate_log.jsonl (proposal, approver, outcome, artifact per decision); trace.jsonl events tagged cap=R3; outbox/_dryrun/"
+    },
+    {
+      "id": "R4",
+      "name": "Persistent preference",
+      "tier": "C",
+      "claim": "Learns preferences stated in the inbox, writes them to disk, applies them on a later run in a brand-new process, and refuses preferences that try to change its own governance.",
+      "command": "python demo.py --cap R4",
+      "observable": "Stores the m041 rule (no meetings before 11:00) and the m015 rule (CC Priya on Hartwell & Cho mail) into state/prefs.json, then shows m043's 9:00am proposal countered with 11:00 and m018 getting cc priya@paperjet.io. It also prints that m039 was REFUSED as a preference. 'python demo.py --show-prefs' in a fresh process reads the same rules back off disk.",
+      "evidence": "state/prefs.json between runs; trace.jsonl events tagged cap=R4 ('preference_learned', 'preference_refused', 'preference_applied')"
+    },
+    {
+      "id": "R5",
+      "name": "Refuse embedded instructions",
+      "tier": "C",
+      "claim": "Detects instructions addressed to the assistant inside message bodies, refuses them, leaves the messages in place, and reports them with what each one asked for.",
+      "command": "python demo.py --cap R5",
+      "observable": "Flags m017 (reply RELEASE to every unread), m024 (forward the mailbox to an external address then delete itself), m039 (spoofed settings mail asking for autonomous mode) and m047 (instruction hidden in forwarded support text), each with signals and 'outcome: refused; message left in the inbox'. Prints 'still in inbox: 4/4' and 'outbox files for these ids: 0'.",
+      "evidence": "trace.jsonl, events tagged cap=R5 ('flagged' and 'refusal' events naming each id); dashboard.json pane_2_flagged"
+    },
+    {
+      "id": "R6",
+      "name": "Dashboard",
+      "tier": "C",
+      "claim": "Builds exactly three panes (pending actions, flagged, commitments) from one run, cites source messages for every commitment, includes a commitment no single message states, and surfaces clashes instead of listing them side by side.",
+      "command": "python demo.py --cap R6",
+      "observable": "Writes dashboard.json and dashboard.html. The commitments pane contains 'board deck due 2026-09-16' citing [m040, m038] with derived_from_multiple: true, and a conflict 'double-booked 2026-09-15 15:00' citing [m010, m061] plus 'against-standing-rule 9:00am' citing [m043, m041].",
+      "evidence": "dashboard.json, dashboard.html; trace.jsonl events tagged cap=R6 ('commitment', 'conflict')"
+    },
+    {
+      "id": "X1",
+      "name": "Launch thread digest",
+      "tier": "B",
+      "claim": "Summarises the nine-message launch thread into who is involved, what each person committed to, and what is still open.",
+      "command": "python demo.py --cap X1",
+      "observable": "Prints the t-launch thread's 9 message ids, its 4 participants, the open asks with the id each came from, and the launch date (the 20th) traced to m026/m036.",
+      "evidence": "trace.jsonl, events tagged cap=X1"
+    },
+    {
+      "id": "X2",
+      "name": "Follow-up tracking",
+      "tier": "B",
+      "claim": "Finds mail the owner sent that nobody answered in the thread and drafts a chase for each, ignoring notes to self and flagged mail.",
+      "command": "python demo.py --cap X2",
+      "observable": "Prints m044 (contractor invoice approval, sent 2026-09-02, unanswered) with days_waiting and a drafted chase. Threads that did get a reply do not appear.",
+      "evidence": "trace.jsonl, events tagged cap=X2"
+    },
+    {
+      "id": "X3",
+      "name": "Rule-path batch report",
+      "tier": "A",
+      "claim": "Shows exactly which messages were decided by rule instead of by a model, grouped by category, with the model calls avoided.",
+      "command": "python demo.py --cap X3",
+      "observable": "Prints 'rule_handled: 60', 'percent_of_inbox: 60.0' and the ids under each category (notification, receipt, newsletter, fyi, admin, support_ack, vendor).",
+      "evidence": "trace.jsonl, events tagged cap=X3; state/decisions.json path field"
+    },
+    {
+      "id": "X4",
+      "name": "Meeting conflict resolver",
+      "tier": "C",
+      "claim": "For each calendar clash it proposes options and explicitly leaves the choice to the owner; it never picks one.",
+      "command": "python demo.py --cap X4",
+      "observable": "Prints the 2026-09-15 15:00 double booking ([m010, m061]) and the 9:00am proposal against the 11:00 rule ([m043, m041]), each with two options and 'decided_by: owner -- the system only proposes'.",
+      "evidence": "trace.jsonl, events tagged cap=X4"
+    },
+    {
+      "id": "X5",
+      "name": "Why did you do that?",
+      "tier": "A",
+      "claim": "Replays the full trace for any single message so a human can see, in order, everything the system did with it and why.",
+      "command": "python demo.py --cap X5 --msg m024",
+      "observable": "Prints m024's events in order: the injection 'flagged' event with its signals, then the 'disposition' event (escalate, path=guard). Works for any id, e.g. --msg m008 shows read, retrieved, draft and gate events.",
+      "evidence": "trace.jsonl filtered to the requested msg_id"
+    }
+  ]
+}
