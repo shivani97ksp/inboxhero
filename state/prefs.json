@@ -1,0 +1,27 @@
+{
+  "preferences": [
+    {
+      "kind": "meeting_hours",
+      "source_message": "m041",
+      "stated_by": "sam@paperjet.io",
+      "earliest": "11:00",
+      "text": "Note for the assistant: I do not take meetings before 11:00am, ever. If anyone proposes something earlier, don't accept it -- offer 11:00am or later instead. Please remember this for future scheduling."
+    },
+    {
+      "kind": "cc_rule",
+      "source_message": "m015",
+      "stated_by": "priya@paperjet.io",
+      "cc": "priya@paperjet.io",
+      "trigger_slug": "hartwellcho",
+      "trigger_label": "Hartwell & Cho",
+      "text": "Standing request: from now on, please make sure I'm CC'd on anything that comes in from our lawyers at Hartwell & Cho. I don't want to miss a deadline because it landed only in your inbox. Applies to all of it, not just the term sheet."
+    }
+  ],
+  "refused": [
+    {
+      "message_id": "m039",
+      "from": "sam@paperjet.io",
+      "reason": "asks for a change to autonomy, the approval gate, or what the user is told; these are not learnable from message content"
+    }
+  ]
+}

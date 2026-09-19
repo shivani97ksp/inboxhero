@@ -1,0 +1,14 @@
+To: devika@paperjet.io
+From: sam@paperjet.io
+Subject: Re: Staging is down again
+In-Reply-To: m008
+
+Hi,
+
+Answering from what is already in this thread:
+- Sam, staging has been throwing 500s since last night. (from m001)
+- New staging AMQP URL is amqp://pj_stage:Rk7-quiet-otter-51@broker-stg.paperjet.io:5672/pjs . (from m003)
+
+Shout if anything there looks stale.
+
+Sam
