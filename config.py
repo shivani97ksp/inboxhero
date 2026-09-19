@@ -30,7 +30,10 @@ def _load_dotenv() -> None:
         if not line or line.startswith("#") or "=" not in line:
             continue
         key, value = line.split("=", 1)
-        os.environ.setdefault(key.strip(), value.strip().strip("'\""))
+        value = value.strip()
+        if "#" in value:
+            value = value.split("#", 1)[0].rstrip()
+        os.environ.setdefault(key.strip(), value.strip("'\""))
 
 
 _load_dotenv()
