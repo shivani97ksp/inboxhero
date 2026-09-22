@@ -1,4 +1,4 @@
-# CAPABILITIES.md — inboxHero
+# CAPABILITIES.md: inboxHero
 
 **Student:** Shivani Singh, evernorth-aai-1192468
 **Repository:** https://github.com/shivani97ksp/inboxhero
@@ -28,7 +28,7 @@ notifications without spending a model call, a **classifier** for what is left, 
 a **drafter** that may only use retrieved sentences and must cite their message ids,
 and a **gate** that stands in front of the two irreversible actions. A final pass
 extracts commitments, finds clashes, and renders the dashboard. Everything that must
-outlive a run — preferences, decisions, the gate log, the trace — is a small JSON or
+outlive a run. Preferences, decisions, the gate log, and the trace are small JSON or
 JSONL file on disk.
 
 ```
@@ -37,7 +37,7 @@ load -> guard -> rules -> classify -> retrieve -> draft -> gate -> commitments -
                                                       trace.jsonl (every step)
 ```
 
-## Design choices you were asked to state
+## Design choices:
 
 - **Framework: none.** The work is one linear pipeline with a single branch
   (rule path vs model path). CrewAI or ADK would add an agent-to-agent protocol and a
@@ -49,7 +49,7 @@ load -> guard -> rules -> classify -> retrieve -> draft -> gate -> commitments -
   iterating cost nothing and hit no quota. `INBOXHERO_PROVIDER=gemini` switches to
   `gemini-1.5-flash` for the graded run. A third mode, `offline`, replaces the model
   with deterministic heuristics so every capability is demonstrable with no key at
-  all — useful for a marker, and it is also the fallback when a call fails.
+  all. This is useful for a marker, and it is also the fallback when a call fails.
 - **Rate limits.** Classification is batched (`INBOXHERO_BATCH_SIZE`, default 8
   messages per call), calls are spaced (`INBOXHERO_RPM_DELAY`, default 4s), HTTP 429
   and 5xx are retried with exponential backoff up to `INBOXHERO_MAX_RETRIES`, and
@@ -64,13 +64,13 @@ load -> guard -> rules -> classify -> retrieve -> draft -> gate -> commitments -
   answered out of an unrelated calendar mail.
 - **Reversible vs irreversible.** `send` and `delete` are irreversible and gated.
   `draft`, `label`, `flag`, `archive`, `defer` are reversible and run unattended. A
-  delete is irreversible because this mock store has no trash — and even after
+  delete is irreversible because this mock store has no trash. Even after
   approval, `delete` only writes a tombstone to `state/deleted.json`; `inbox.json` is
   never rewritten, so a hostile message cannot destroy the evidence of itself.
 - **Where the gate sits.** Exactly two functions cause an irreversible effect, and
   neither is reachable except through `Gate.propose()`. That is also the Part 6
   defence: hostile text can at worst influence the *content* of a draft, it cannot
-  reach a send. The default mode is `both` — a dry-run artifact is written *and*
+  reach a send. The default mode is `both`: a dry-run artifact is written *and*
   per-message approval is required, so `--cap R3` with no extra flags sends nothing.
 - **Escalation line.** Money, legal, credentials, anything external, and anything the
   guard flagged go to the human. Receipts, newsletters and notifications are archived
@@ -78,7 +78,7 @@ load -> guard -> rules -> classify -> retrieve -> draft -> gate -> commitments -
   wrongly-archived newsletter is cheaper than 60 approval prompts.
 - **Preferences are content, not configuration.** The system learns scheduling and
   CC rules from message text, but a stated preference that would change its own
-  autonomy, its approval gate, or what the user gets told is refused and reported —
+  autonomy, its approval gate, or what the user gets told is refused and reported.
   which is why the spoofed `m039` is stored under `refused`, not under `preferences`.
 
 ## Capabilities
@@ -98,17 +98,17 @@ load -> guard -> rules -> classify -> retrieve -> draft -> gate -> commitments -
 | X5 | Why did you do that? | A | replays the trace for any single message id |
 
 The exact command, observable outcome and evidence for each is in
-`capabilities.json` — that file is what a marking script reads; this one is for a
+`capabilities.json`: that file is what a marking script reads; this one is for a
 human. They are kept in step.
 
 ### What the panes contain (R6)
 
-- **Pending actions** — the 31 messages waiting on a human, each with the
+- **Pending actions:** the 31 messages waiting on a human, each with the
   disposition, the reason, and whether a draft is already prepared.
-- **Flagged** — the four prompt injections (`m017`, `m024`, `m039`, `m047`) with the
+- **Flagged:** the four prompt injections (`m017`, `m024`, `m039`, `m047`) with the
   signals that caught each, the three social-engineering attempts (`m021`, `m023`,
   `m045`), and the refused preference write.
-- **Commitments** — 19 dated items, each citing its source ids. `board deck due
+- **Commitments:** 19 dated items, each citing its source ids. `board deck due
   2026-09-16` cites `[m040, m038]` and is marked `derived_from_multiple: true`: no
   single message says the 16th; `m040` asks for the deck two days before the board
   review and `m038` dates that review to the 18th. Clashes are lifted out of the
@@ -130,7 +130,7 @@ retracted. In the default run, `--cap R3` proposes a send for `m008` and a delet
 the phishing mail `m045` and executes neither.
 
 **Its own governance.** Preferences are learned from message text, which means the
-inbox is an input to behaviour — so the one thing it may not change is the rules
+inbox is an input to behaviour, so the one thing it may not change is the rules
 about changing behaviour. Autonomy, the approval gate, and what the user is told are
 not learnable at all. `m039` arrives looking like Sam asking for exactly those three
 (autonomous mode, no approval, persist across restarts) and is refused on content,
@@ -177,12 +177,12 @@ artifact path. Accountability is only meaningful if it is checkable, so the log 
 written before the action, not after.
 
 That is deliberately narrow, and it splits along one line. If the system sent
-something it was **approved** to send, the approval is the decision — which is why
+something it was **approved** to send, the approval is the decision. This is why
 the gate shows the rendered body, the recipients, the CCs and the cited ids, not just
 "send y/n". If it sent something it was **never** approved to send, that is my bug,
 not the approver's: the gate was bypassed, and the same log is the evidence, because a
 send with no matching approval entry is detectable. The residual risk I am accepting
-is the middle case — a correctly-approved send whose *body* was wrong because
+is the middle case: a correctly-approved send whose *body* was wrong because
 retrieval quoted a stale message. `trace.jsonl` pins that down too: the draft event
 lists its cited ids and each of those ids has an earlier `read` event, so any claim in
 a sent mail can be walked back to the message it came from.
@@ -191,23 +191,23 @@ a sent mail can be walked back to the message it came from.
 
 The concepts are all present; they are just functions and files instead of classes.
 
-- **Agent** — a module with one job and its own view of the world: `triage`
+- **Agent:** a module with one job and its own view of the world: `triage`
   (dispose of everything), `retrieve` (find grounding), `draft` (write, citing),
   `guard` (judge hostility), `commitments` (extract and reconcile dates). Each has the
   narrow interface an agent would have, and none can reach another's state.
-- **Task** — a capability function in `demo.py`. It has a goal, the inputs it needs,
+- **Task:** a capability function in `demo.py`. It has a goal, the inputs it needs,
   and an observable output, which is exactly what `capabilities.json` documents. The
   `--cap` flag is the task selector.
-- **Crew / orchestration** — the fixed order in `--all`
+- **Crew / orchestration:** the fixed order in `--all`
   (`R1 → R4 → R2 → R5 → R3 → R6 → X1…X5`). It is a dependency order, not a
   conversation: preferences must exist before drafts apply them, drafts before the
   gate can propose them, dispositions before the dashboard can report them. A crew
   would schedule the same edges; here they are written down.
-- **Router** — `rules.py` plus the guard, running before any model. It is the cheap
+- **Router:** `rules.py` plus the guard, running before any model. It is the cheap
   classifier that decides which messages need the expensive path at all, and it takes
   60 of 100 off the table. Inside the model path, `retrieve` routes again:
   thread-walk first, keyword search only if the thread has nothing concrete.
-- **Memory** — `state/prefs.json` for what must outlive the process,
+- **Memory:** `state/prefs.json` for what must outlive the process,
   `state/decisions.json` for the last run's verdicts, `.cache/` for model responses,
   `trace.jsonl` for the audit trail. Short-term memory is just the store's read set,
   which is also what makes citation verification possible.
