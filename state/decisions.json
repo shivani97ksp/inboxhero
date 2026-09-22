@@ -1,5 +1,5 @@
 {
-  "model": "gemini:gemini-1.5-flash",
+  "model": "offline-heuristic",
   "messages_processed": 100,
   "rule_handled": 60,
   "guard_handled": 7,

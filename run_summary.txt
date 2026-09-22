@@ -1,9 +1,9 @@
 inboxHero run summary
-model: gemini:gemini-1.5-flash
+model: offline-heuristic
 messages processed: 100 (undecided: 0)
 handled without a model call: 67
 dispositions: {'reply': 9, 'archive': 62, 'defer': 9, 'delegate': 2, 'escalate': 18}
 flagged and refused: 7
 commitments: 19 (conflicts: 2)
-gate decisions logged: 3
+gate decisions logged: 8
 outbox files: ['draft_m008_re-staging-is-down-again.eml', 'would_delete_m045_phishing-message.eml', 'would_send_m008_re-staging-is-down-again.eml']

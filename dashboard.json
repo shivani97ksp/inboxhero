@@ -1,6 +1,6 @@
 {
-  "generated": "2026-09-19T09:48:26",
-  "model": "gemini:gemini-1.5-flash",
+  "generated": "2026-09-22T10:55:34",
+  "model": "offline-heuristic",
   "pane_1_pending_actions": [
     {
       "message_id": "m001",
@@ -649,6 +649,6 @@
     "flagged": 7,
     "commitments": 19,
     "conflicts": 2,
-    "gate_decisions": 3
+    "gate_decisions": 8
   }
 }
