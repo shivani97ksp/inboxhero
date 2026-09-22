@@ -9,7 +9,7 @@ human, and renders a three-pane dashboard.
 
 Pure Python, standard library only. No framework, no dependencies to install.
 
-- `CAPABILITIES.md`: design choices and the Final Report (read this first)
+- `CAPABILITIES.md`: short human-readable capability and evidence index
 - `capabilities.json`: machine-readable manifest with one command per capability
 
 ## Architecture and decisions
