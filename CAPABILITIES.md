@@ -49,5 +49,4 @@ human. They are kept in step.
   review and `m038` dates that review to the 18th. Clashes are lifted out of the
   list: `m010`'s Tuesday 15:00 call against the `m061` dental appointment at the same
   hour, and `m043`'s 9:00am proposal against the standing 11:00 rule from `m041`.
----
 
