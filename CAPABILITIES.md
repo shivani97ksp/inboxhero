@@ -28,8 +28,8 @@ notifications without spending a model call, a **classifier** for what is left, 
 a **drafter** that may only use retrieved sentences and must cite their message ids,
 and a **gate** that stands in front of the two irreversible actions. A final pass
 extracts commitments, finds clashes, and renders the dashboard. Everything that must
-outlive a run. Preferences, decisions, the gate log, and the trace are small JSON or
-JSONL file on disk.
+outlive a run, including preferences, decisions, the gate log, and the trace, is
+stored in a small JSON or JSONL file on disk.
 
 ```
 load -> guard -> rules -> classify -> retrieve -> draft -> gate -> commitments -> dashboard
@@ -79,7 +79,7 @@ load -> guard -> rules -> classify -> retrieve -> draft -> gate -> commitments -
 - **Preferences are content, not configuration.** The system learns scheduling and
   CC rules from message text, but a stated preference that would change its own
   autonomy, its approval gate, or what the user gets told is refused and reported.
-  which is why the spoofed `m039` is stored under `refused`, not under `preferences`.
+  This is why the spoofed `m039` is stored under `refused`, not under `preferences`.
 
 ## Capabilities
 
